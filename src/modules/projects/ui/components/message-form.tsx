@@ -1,4 +1,4 @@
-import { Form, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
@@ -44,10 +44,14 @@ export const MessageForm = ({ projectId }: Props) => {
     }));
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        await createMessage.mutateAsync({
-            value: values.value,
-            projectId,
-        });
+        try {
+            await createMessage.mutateAsync({
+                value: values.value,
+                projectId,
+            });
+        } catch (error) {
+            console.error('Submit error:', error);
+        }
     }
 
     const [isFocused, setIsFocused] = useState(false);
@@ -56,15 +60,17 @@ export const MessageForm = ({ projectId }: Props) => {
     const showUsage = false; // Placeholder for usage logic
 
     return (
-        <Form {...form}>
-            <form 
-                onSubmit={form.handleSubmit(onSubmit)}
-                className={cn(
-                    "relative border p-4 pt-1 rounded-xl bg-sidebar dark:bg-sidebar transition-all",
-                    isFocused && "shadow -xs",
-                    showUsage && "rounded-t-none",
-                )}
-            >
+        <form 
+            onSubmit={(e) => {
+                e.preventDefault();
+                form.handleSubmit(onSubmit)();
+            }}
+            className={cn(
+                "relative border p-4 pt-1 rounded-xl bg-sidebar dark:bg-sidebar transition-all",
+                isFocused && "shadow -xs",
+                showUsage && "rounded-t-none",
+            )}
+        >
                 <FormField
                     control={form.control}
                     name="value"
@@ -90,11 +96,12 @@ export const MessageForm = ({ projectId }: Props) => {
                 <div className="flex gap-x-2 items-end justify-between pt-2">
                     <div className="text-[10px] text-muted-foreground font-mono">
                         <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-                            <span>&#8984</span>Enter
+                            <span>⌘</span>Enter
                         </kbd>
                         &nbsp;to submit
                     </div>
                     <Button
+                        type="submit"
                         disabled={isButtonDisabled}
                         className={cn(
                             "size-8 rounded-full",
@@ -104,11 +111,10 @@ export const MessageForm = ({ projectId }: Props) => {
                         {isPending ? (
                             <Loader2Icon className="size-4 animate-spin" />
                         ) : (
-                            <ArrowUpIcon />
+                            <ArrowUpIcon className="size-4" />
                         )}
                     </Button>
                 </div>
             </form>
-        </Form>
     )
 }

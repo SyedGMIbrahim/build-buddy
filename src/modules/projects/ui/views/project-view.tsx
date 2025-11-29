@@ -2,6 +2,7 @@
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { MessagesContainer } from "../components/messages-container";
+import { ProjectHeader } from "../components/project-header";
 import { Suspense } from "react";
 
 interface Props {
@@ -13,6 +14,9 @@ export const ProjectView = ({ projectId }: Props) => {
         <div className="h-screen">
             <ResizablePanelGroup direction="horizontal">
                 <ResizablePanel defaultSize={35} minSize={20} className="flex flex-col min-h-0">
+                    <Suspense fallback={<p>Loading project...</p>}>
+                        <ProjectHeader projectId={projectId} />
+                    </Suspense>
                     <Suspense fallback={<p>Loading messages...</p>}>
                         <MessagesContainer projectId={projectId} />
                     </Suspense>
